@@ -22,7 +22,7 @@ struct StaticArena {
   size_t size;
 };
 
-extern inline StaticArena *static_arena__new(const size_t size) {
+static inline StaticArena *static_arena__new(const size_t size) {
   StaticArena *self =
       _M_cast(StaticArena *, _M_alloc(sizeof(StaticArena) + size));
 
@@ -32,9 +32,9 @@ extern inline StaticArena *static_arena__new(const size_t size) {
   return self;
 }
 
-extern inline void static_arena__free(StaticArena *self) { _M_free(self); }
+static inline void static_arena__free(StaticArena *self) { _M_free(self); }
 
-extern inline StaticArena *static_arena__clone(const StaticArena *self) {
+static inline StaticArena *static_arena__clone(const StaticArena *self) {
   StaticArena *other = static_arena__new(self->size);
   size_t wh_offset =
       _M_cast(size_t, self->writehead - _M_cast(uint8_t *, self));
@@ -45,16 +45,16 @@ extern inline StaticArena *static_arena__clone(const StaticArena *self) {
   return other;
 }
 
-extern inline size_t static_arena__cap(const StaticArena *self) {
+static inline size_t static_arena__cap(const StaticArena *self) {
   return (self->size + sizeof(StaticArena)) -
          _M_cast(size_t, self->writehead - _M_cast(uint8_t *, self));
 }
 
-extern inline void static_arena__reset(StaticArena *self) {
+static inline void static_arena__reset(StaticArena *self) {
   self->writehead = _M_cast(uint8_t *, self) + sizeof(StaticArena);
 }
 
-extern inline uint8_t *static_arena__alloc(StaticArena *self,
+static inline uint8_t *static_arena__alloc(StaticArena *self,
                                            const size_t size) {
   if (static_arena__cap(self) < size) {
 #ifndef __CCMS_SUPPRESS_WARNINGS

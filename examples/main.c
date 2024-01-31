@@ -1,18 +1,18 @@
 #include <assert.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define __CCMS_SUPPRESS_WARNINGS
 #define __CCMS_NO_SIZE_MACROS
 
-extern inline void* my_malloc(const size_t size) {
+void *my_malloc(const size_t size) {
   void *ptr = malloc(size);
   printf("malloc: %p, size %ldB\n", ptr, size);
   return ptr;
 }
 
-extern inline void my_free(void* ptr) {
+void my_free(void *ptr) {
   printf("free  : %p\n", ptr);
   free(ptr);
 }

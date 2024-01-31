@@ -19,7 +19,7 @@ struct _DynamicArenaBlock {
   size_t size;
 };
 
-extern inline _DynamicArenaBlock *
+static inline _DynamicArenaBlock *
 _dynamic_arena_block__new(const size_t size, _DynamicArenaBlock *next) {
   _DynamicArenaBlock *self = _M_cast(
       _DynamicArenaBlock *, _M_alloc(sizeof(_DynamicArenaBlock) + size));
@@ -30,11 +30,11 @@ _dynamic_arena_block__new(const size_t size, _DynamicArenaBlock *next) {
   return self;
 }
 
-extern inline void _dynamic_arena_block__free(_DynamicArenaBlock *self) {
+static inline void _dynamic_arena_block__free(_DynamicArenaBlock *self) {
   _M_free(self);
 }
 
-extern inline _DynamicArenaBlock *
+static inline _DynamicArenaBlock *
 _dynamic_arena_block__clone(const _DynamicArenaBlock *self) {
   _DynamicArenaBlock *other = _M_cast(
       _DynamicArenaBlock *, _M_alloc(sizeof(_DynamicArenaBlock) + self->size));
@@ -47,7 +47,7 @@ struct DynamicArena {
   _DynamicArenaBlock *head, *tail;
 };
 
-extern inline DynamicArena *dynamic_arena__new() {
+static inline DynamicArena *dynamic_arena__new() {
   DynamicArena *self = _M_new(DynamicArena);
 
   self->head = self->tail = NULL;
@@ -55,7 +55,7 @@ extern inline DynamicArena *dynamic_arena__new() {
   return self;
 }
 
-extern inline void dynamic_arena__reset(DynamicArena *self) {
+static inline void dynamic_arena__reset(DynamicArena *self) {
   for (_DynamicArenaBlock *itr = self->head, *tmp; itr != NULL; itr = tmp) {
     tmp = itr->next;
     _dynamic_arena_block__free(itr);
@@ -64,12 +64,12 @@ extern inline void dynamic_arena__reset(DynamicArena *self) {
   self->head = self->tail = NULL;
 }
 
-extern inline void dynamic_arena__free(DynamicArena *self) {
+static inline void dynamic_arena__free(DynamicArena *self) {
   dynamic_arena__reset(self);
   _M_free(self);
 }
 
-extern inline uint8_t *dynamic_arena__alloc(DynamicArena *self,
+static inline uint8_t *dynamic_arena__alloc(DynamicArena *self,
                                             const size_t size) {
   _DynamicArenaBlock *new_block = _dynamic_arena_block__new(size, NULL);
 

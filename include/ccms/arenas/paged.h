@@ -22,7 +22,7 @@ struct _PagedArenaPage {
   size_t pos;
 };
 
-extern inline _PagedArenaPage *_paged_arena_page__new(const size_t size,
+static inline _PagedArenaPage *_paged_arena_page__new(const size_t size,
                                                       _PagedArenaPage *next) {
   _PagedArenaPage *self =
       _M_cast(_PagedArenaPage *, _M_alloc(sizeof(_PagedArenaPage) + size));
@@ -33,11 +33,11 @@ extern inline _PagedArenaPage *_paged_arena_page__new(const size_t size,
   return self;
 }
 
-extern inline void _paged_arena_page__free(_PagedArenaPage *self) {
+static inline void _paged_arena_page__free(_PagedArenaPage *self) {
   _M_free(self);
 }
 
-extern inline void _paged_arena_page__reset(_PagedArenaPage *self) {
+static inline void _paged_arena_page__reset(_PagedArenaPage *self) {
   self->pos = 0;
 }
 
@@ -46,7 +46,7 @@ struct PagedArena {
   size_t page_size;
 };
 
-extern inline PagedArena *paged_arena__new(const size_t page_size) {
+static inline PagedArena *paged_arena__new(const size_t page_size) {
   PagedArena *self = _M_new(PagedArena);
 
   self->page_size = page_size;
@@ -55,7 +55,7 @@ extern inline PagedArena *paged_arena__new(const size_t page_size) {
   return self;
 }
 
-extern inline void paged_arena__free(PagedArena *self) {
+static inline void paged_arena__free(PagedArena *self) {
   for (_PagedArenaPage *itr = self->head, *tmp; itr != NULL; itr = tmp) {
     tmp = itr->next;
     _paged_arena_page__free(itr);
@@ -63,14 +63,14 @@ extern inline void paged_arena__free(PagedArena *self) {
   _M_free(self);
 }
 
-extern inline void paged_arena__reset(PagedArena *self) {
+static inline void paged_arena__reset(PagedArena *self) {
   for (_PagedArenaPage *itr = self->head; itr != NULL; itr = itr->next)
     _paged_arena_page__reset(itr);
 
   self->tail = self->head;
 }
 
-extern inline void paged_arena__hard_reset(PagedArena *self) {
+static inline void paged_arena__hard_reset(PagedArena *self) {
   if (self->head->next != NULL)
     for (_PagedArenaPage *itr = self->head->next, *tmp; itr != NULL;
          itr = tmp) {
@@ -83,7 +83,7 @@ extern inline void paged_arena__hard_reset(PagedArena *self) {
   self->tail = self->head;
 }
 
-extern inline uint8_t *paged_arena__alloc(PagedArena *self, const size_t size) {
+static inline uint8_t *paged_arena__alloc(PagedArena *self, const size_t size) {
   if (size > self->page_size) {
 #ifndef __CCMS_SUPPRESS_WARNINGS
     fprintf(stderr,
@@ -108,7 +108,7 @@ extern inline uint8_t *paged_arena__alloc(PagedArena *self, const size_t size) {
   return result;
 }
 
-extern inline float paged_arena__avg_util(const PagedArena *self) {
+static inline float paged_arena__avg_util(const PagedArena *self) {
   float sum = 0.f;
   size_t len = 0;
 
