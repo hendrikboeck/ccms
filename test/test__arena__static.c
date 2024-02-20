@@ -23,64 +23,74 @@
 #include <assert.h>
 
 // Include the header file to test
-#include "ccms/sized_memory.h"
+#include "ccms/arena/static.h"
 
 //
 //
-// ------------------ SizedMemory ------------------
+// ------------------ StaticArena ------------------
 //
 //
 
-void test__sized_memory__new() {
+void test__static_arena__new_and_free() {
   // -- TEST
-  SizedMemory* sm = sized_memory__new(10);
-  assert(sm != NULL);
-  assert(sm->size == 10);
+  StaticArena* sa = static_arena__new(10);
+  assert(sa != NULL);
+  assert(sa->size == 10);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  static_arena__free(sa);
 }
 
-void test__sized_memory__clone() {
+void test__static_arena__clone() {
   // -- PREPARE
-  SizedMemory* sm1 = sized_memory__new(10);
+  StaticArena* sa1 = static_arena__new(10);
 
   // -- TEST
-  SizedMemory* sm2 = sized_memory__clone(sm1);
-  assert(sm2 != NULL);
-  assert(sm2->size == sm1->size);
-  assert(memcmp(sm1->ptr, sm2->ptr, sm1->size) == 0);
+  StaticArena* sa2 = static_arena__clone(sa1);
+  assert(sa2 != NULL);
+  assert(sa2->size == sa1->size);
 
   // -- CLEANUP
-  sized_memory__free(sm1);
-  sized_memory__free(sm2);
+  static_arena__free(sa1);
+  static_arena__free(sa2);
 }
 
-void test__sized_memory__as_box() {
+void test__static_arena__cap() {
   // -- PREPARE
-  SizedMemory* sm = sized_memory__new(10);
+  StaticArena* sa = static_arena__new(10);
 
   // -- TEST
-  Box b = sized_memory__as_box(sm);
-  assert(b.ptr == sm->ptr);
-  assert(b.size == sm->size);
+  assert(static_arena__cap(sa) == 10);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  static_arena__free(sa);
 }
 
-void test__sized_memory__from_box() {
+void test__static_arena__reset() {
   // -- PREPARE
-  Box b = box__ctor((uint8_t*)"hello", 5);
+  StaticArena* sa = static_arena__new(10);
+  static_arena__alloc(sa, 5);
+  assert(static_arena__cap(sa) == 5);
 
   // -- TEST
-  SizedMemory* sm = sized_memory__from_box(b);
-  assert(sm != NULL);
-  assert(sm->size == b.size);
-  assert(memcmp(sm->ptr, b.ptr, b.size) == 0);
+  static_arena__reset(sa);
+  assert(static_arena__cap(sa) == 10);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  static_arena__free(sa);
+}
+
+void test__static_arena__alloc() {
+  // -- PREPARE
+  StaticArena* sa = static_arena__new(10);
+
+  // -- TEST
+  uint8_t* mem = static_arena__alloc(sa, 5);
+  assert(mem != NULL);
+  assert(static_arena__cap(sa) == 5);
+
+  // -- CLEANUP
+  static_arena__free(sa);
 }
 
 //
@@ -90,11 +100,12 @@ void test__sized_memory__from_box() {
 //
 
 int main() {
-  // -- SizedMemory
-  test__sized_memory__new();
-  test__sized_memory__clone();
-  test__sized_memory__as_box();
-  test__sized_memory__from_box();
+  // -- StaticArena
+  test__static_arena__new_and_free();
+  test__static_arena__clone();
+  test__static_arena__cap();
+  test__static_arena__reset();
+  test__static_arena__alloc();
 
   return 0;
 }

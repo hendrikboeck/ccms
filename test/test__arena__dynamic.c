@@ -23,64 +23,80 @@
 #include <assert.h>
 
 // Include the header file to test
-#include "ccms/sized_memory.h"
+#include "ccms/arena/dynamic.h"
 
 //
 //
-// ------------------ SizedMemory ------------------
+// ------------------ _DynamicArenaBlock ------------------
 //
 //
 
-void test__sized_memory__new() {
+void test___dynamic_arena_block__new() {
   // -- TEST
-  SizedMemory* sm = sized_memory__new(10);
-  assert(sm != NULL);
-  assert(sm->size == 10);
+  _DynamicArenaBlock* block = _dynamic_arena_block__new(10, NULL);
+  assert(block != NULL);
+  assert(block->size == 10);
+  assert(block->next == NULL);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  _dynamic_arena_block__free(block);
 }
 
-void test__sized_memory__clone() {
+void test___dynamic_arena_block__clone() {
   // -- PREPARE
-  SizedMemory* sm1 = sized_memory__new(10);
+  _DynamicArenaBlock* block = _dynamic_arena_block__new(10, NULL);
 
   // -- TEST
-  SizedMemory* sm2 = sized_memory__clone(sm1);
-  assert(sm2 != NULL);
-  assert(sm2->size == sm1->size);
-  assert(memcmp(sm1->ptr, sm2->ptr, sm1->size) == 0);
+  _DynamicArenaBlock* clone = _dynamic_arena_block__clone(block);
+  assert(clone != NULL);
+  assert(clone->size == block->size);
+  assert(clone->next == block->next);
 
   // -- CLEANUP
-  sized_memory__free(sm1);
-  sized_memory__free(sm2);
+  _dynamic_arena_block__free(block);
+  _dynamic_arena_block__free(clone);
 }
 
-void test__sized_memory__as_box() {
-  // -- PREPARE
-  SizedMemory* sm = sized_memory__new(10);
+//
+//
+// ------------------ DynamicArena ------------------
+//
+//
 
+void test__dynamic_arena__new() {
   // -- TEST
-  Box b = sized_memory__as_box(sm);
-  assert(b.ptr == sm->ptr);
-  assert(b.size == sm->size);
+  DynamicArena* arena = dynamic_arena__new();
+  assert(arena != NULL);
+  assert(arena->head == NULL);
+  assert(arena->tail == NULL);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  dynamic_arena__free(arena);
 }
 
-void test__sized_memory__from_box() {
+void test__dynamic_arena__reset() {
   // -- PREPARE
-  Box b = box__ctor((uint8_t*)"hello", 5);
+  DynamicArena* arena = dynamic_arena__new();
 
   // -- TEST
-  SizedMemory* sm = sized_memory__from_box(b);
-  assert(sm != NULL);
-  assert(sm->size == b.size);
-  assert(memcmp(sm->ptr, b.ptr, b.size) == 0);
+  dynamic_arena__reset(arena);
+  assert(arena->head == NULL);
+  assert(arena->tail == NULL);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  dynamic_arena__free(arena);
+}
+
+void test__dynamic_arena__alloc() {
+  // -- PREPARE
+  DynamicArena* arena = dynamic_arena__new();
+
+  // -- TEST
+  uint8_t* memory = dynamic_arena__alloc(arena, 10);
+  assert(memory != NULL);
+
+  // -- CLEANUP
+  dynamic_arena__free(arena);
 }
 
 //
@@ -90,11 +106,14 @@ void test__sized_memory__from_box() {
 //
 
 int main() {
-  // -- SizedMemory
-  test__sized_memory__new();
-  test__sized_memory__clone();
-  test__sized_memory__as_box();
-  test__sized_memory__from_box();
+  // -- _DynamicArenaBlock
+  test___dynamic_arena_block__new();
+  test___dynamic_arena_block__clone();
+
+  // -- DynamicArena
+  test__dynamic_arena__new();
+  test__dynamic_arena__reset();
+  test__dynamic_arena__alloc();
 
   return 0;
 }
