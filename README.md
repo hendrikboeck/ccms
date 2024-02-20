@@ -37,8 +37,6 @@ rm -rf ccms
 ### Barebones
 
 ```sh
-# install dependecies to include folder
-
 git clone https://github.com/hendrikboeck/ccms.git
 cp -r ccms/include/* <your-include-folder>/
 rm -rf ccms
