@@ -3,16 +3,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define __CCMS_SUPPRESS_WARNINGS
+#define __CCMS__SUPPRESS_WARNINGS
 #define __CCMS_NO_SIZE_MACROS
 
-void *my_malloc(const size_t size) {
-  void *ptr = malloc(size);
+void* my_malloc(const size_t size) {
+  void* ptr = malloc(size);
   printf("malloc: %p, size %ldB\n", ptr, size);
   return ptr;
 }
 
-void my_free(void *ptr) {
+void my_free(void* ptr) {
   printf("free  : %p\n", ptr);
   free(ptr);
 }
@@ -24,14 +24,14 @@ void my_free(void *ptr) {
 #include "ccms/arenas/paged.h"
 
 int32_t main(void) {
-  PagedArena *arena = paged_arena__new(sizeof(int32_t) * 10);
+  PagedArena* arena = paged_arena__new(sizeof(int32_t) * 10);
 
-  int32_t *arr0 =
-      _M_cast(int32_t *, paged_arena__alloc(arena, sizeof(int32_t) * 10));
+  int32_t* arr0 =
+      _M_cast(int32_t*, paged_arena__alloc(arena, sizeof(int32_t) * 10));
   assert(arr0 != NULL);
 
-  int32_t *arr1 =
-      _M_cast(int32_t *, paged_arena__alloc(arena, sizeof(int32_t) * 16));
+  int32_t* arr1 =
+      _M_cast(int32_t*, paged_arena__alloc(arena, sizeof(int32_t) * 16));
   assert(arr1 == NULL);
 
   paged_arena__free(arena);

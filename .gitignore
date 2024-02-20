@@ -1,9 +1,8 @@
-.vscode/
-.xmake/
-.cache/
-.venv/
-src/
-__pycache__
-build/
+.vscode
+.xmake
+.cache
+.venv
+**/__py_cache__
+build
 compile_commands.json
 
