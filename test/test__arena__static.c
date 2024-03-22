@@ -27,70 +27,70 @@
 
 //
 //
-// ------------------ StaticArena ------------------
+// ------------------ st_arena_t ------------------
 //
 //
 
-void test__static_arena__new_and_free() {
+void test__st_arena__new_and_free() {
   // -- TEST
-  StaticArena* sa = static_arena__new(10);
+  st_arena_t* sa = st_arena__new(10);
   assert(sa != NULL);
   assert(sa->size == 10);
 
   // -- CLEANUP
-  static_arena__free(sa);
+  st_arena__free(sa);
 }
 
-void test__static_arena__clone() {
+void test__st_arena__clone() {
   // -- PREPARE
-  StaticArena* sa1 = static_arena__new(10);
+  st_arena_t* sa1 = st_arena__new(10);
 
   // -- TEST
-  StaticArena* sa2 = static_arena__clone(sa1);
+  st_arena_t* sa2 = st_arena__clone(sa1);
   assert(sa2 != NULL);
   assert(sa2->size == sa1->size);
 
   // -- CLEANUP
-  static_arena__free(sa1);
-  static_arena__free(sa2);
+  st_arena__free(sa1);
+  st_arena__free(sa2);
 }
 
-void test__static_arena__cap() {
+void test__st_arena__cap() {
   // -- PREPARE
-  StaticArena* sa = static_arena__new(10);
+  st_arena_t* sa = st_arena__new(10);
 
   // -- TEST
-  assert(static_arena__cap(sa) == 10);
+  assert(st_arena__cap(sa) == 10);
 
   // -- CLEANUP
-  static_arena__free(sa);
+  st_arena__free(sa);
 }
 
-void test__static_arena__reset() {
+void test__st_arena__reset() {
   // -- PREPARE
-  StaticArena* sa = static_arena__new(10);
-  static_arena__alloc(sa, 5);
-  assert(static_arena__cap(sa) == 5);
+  st_arena_t* sa = st_arena__new(10);
+  st_arena__alloc(sa, 5);
+  assert(st_arena__cap(sa) == 5);
 
   // -- TEST
-  static_arena__reset(sa);
-  assert(static_arena__cap(sa) == 10);
+  st_arena__reset(sa);
+  assert(st_arena__cap(sa) == 10);
 
   // -- CLEANUP
-  static_arena__free(sa);
+  st_arena__free(sa);
 }
 
-void test__static_arena__alloc() {
+void test__st_arena__alloc() {
   // -- PREPARE
-  StaticArena* sa = static_arena__new(10);
+  st_arena_t* sa = st_arena__new(10);
 
   // -- TEST
-  uint8_t* mem = static_arena__alloc(sa, 5);
+  uint8_t* mem = st_arena__alloc(sa, 5);
   assert(mem != NULL);
-  assert(static_arena__cap(sa) == 5);
+  assert(st_arena__cap(sa) == 5);
 
   // -- CLEANUP
-  static_arena__free(sa);
+  st_arena__free(sa);
 }
 
 //
@@ -100,12 +100,12 @@ void test__static_arena__alloc() {
 //
 
 int main() {
-  // -- StaticArena
-  test__static_arena__new_and_free();
-  test__static_arena__clone();
-  test__static_arena__cap();
-  test__static_arena__reset();
-  test__static_arena__alloc();
+  // -- st_arena_t
+  test__st_arena__new_and_free();
+  test__st_arena__clone();
+  test__st_arena__cap();
+  test__st_arena__reset();
+  test__st_arena__alloc();
 
   return 0;
 }

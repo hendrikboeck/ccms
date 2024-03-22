@@ -24,16 +24,16 @@ void my_free(void* ptr) {
 #include "ccms/arena/paged.h"
 
 int32_t main(void) {
-  PagedArena* arena = paged_arena__new(sizeof(int32_t) * 10);
+  pg_arena_t* arena = pg_arena__new(sizeof(int32_t) * 10);
 
   int32_t* arr0 =
-      _M_cast(int32_t*, paged_arena__alloc(arena, sizeof(int32_t) * 10));
+      _M_cast(int32_t*, pg_arena__alloc(arena, sizeof(int32_t) * 10));
   assert(arr0 != NULL);
 
   int32_t* arr1 =
-      _M_cast(int32_t*, paged_arena__alloc(arena, sizeof(int32_t) * 16));
+      _M_cast(int32_t*, pg_arena__alloc(arena, sizeof(int32_t) * 16));
   assert(arr1 == NULL);
 
-  paged_arena__free(arena);
+  pg_arena__free(arena);
   return EXIT_SUCCESS;
 }

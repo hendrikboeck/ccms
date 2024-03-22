@@ -34,61 +34,18 @@ extern "C" {
 #include "ccms/_defs.h"
 #include "ccms/_macros.h"
 
-/**
- * @typedef _PagedArenaPage
- * @brief A typedef for the _PagedArenaPage structure.
- *
- * This typedef provides a shorthand for the struct _PagedArenaPage.
- */
-typedef struct _PagedArenaPage _PagedArenaPage;
+typedef struct _pg_arena_page_t _pg_arena_page_t;
 
-/**
- * @typedef PagedArena
- * @brief A typedef for the PagedArena structure.
- *
- * This typedef provides a shorthand for the struct PagedArena.
- */
-typedef struct PagedArena PagedArena;
-
-/**
- * @struct _PagedArenaPage
- * @brief A structure representing a page in a paged memory arena.
- *
- * This structure represents a page in a paged memory arena with a pointer to
- * the next page and the position within the current page.
- *
- * @var _PagedArenaPage::next
- * The pointer to the next page in the paged memory arena. It is a pointer to
- * another _PagedArenaPage.
- *
- * @var _PagedArenaPage::pos
- * The position within the current page. It is of type size_t.
- */
-struct _PagedArenaPage {
-  _PagedArenaPage* next;
+struct _pg_arena_page_t {
+  _pg_arena_page_t* next;
   size_t pos;
 };
 
-/**
- * @brief Creates a new _PagedArenaPage object.
- *
- * This function creates a new _PagedArenaPage object and allocates memory for
- * it. The size of the allocated memory is the size of the _PagedArenaPage
- * struct plus the size specified by the parameter. The pos variable is
- * initialized to 0, representing the index of the first unoccupied byte in the
- * page.
- *
- * @param size The size of the memory to be allocated in addition to the size of
- * the _PagedArenaPage struct.
- * @param next The pointer to the next _PagedArenaPage object.
- *
- * @return A pointer to the newly created _PagedArenaPage object.
- */
 __CCMS__INLINE
-_PagedArenaPage* _paged_arena_page__new(const size_t size,
-                                        _PagedArenaPage* next) {
-  _PagedArenaPage* self =
-      _M_cast(_PagedArenaPage*, _M_alloc(sizeof(_PagedArenaPage) + size));
+_pg_arena_page_t* _pg_arena_page__new(const size_t size,
+                                      _pg_arena_page_t* next) {
+  _pg_arena_page_t* self =
+      _M_cast(_pg_arena_page_t*, _M_alloc(sizeof(_pg_arena_page_t) + size));
 
   self->pos = 0;
   self->next = next;
@@ -96,152 +53,67 @@ _PagedArenaPage* _paged_arena_page__new(const size_t size,
   return self;
 }
 
-/**
- * @brief Frees the memory allocated for a _PagedArenaPage object.
- *
- * This function frees the memory allocated for a _PagedArenaPage object.
- *
- * @param self A pointer to the _PagedArenaPage object to be freed.
- */
 __CCMS__INLINE
-void _paged_arena_page__free(_PagedArenaPage* self) {
+void _pg_arena_page__free(_pg_arena_page_t* self) {
   _M_free(self);
 }
 
-/**
- * @brief Resets the position of a _PagedArenaPage object.
- *
- * This function resets the position of a _PagedArenaPage object to 0,
- * indicating that the page is unoccupied.
- *
- * @param self A pointer to the _PagedArenaPage object to be reset.
- */
 __CCMS__INLINE
-void _paged_arena_page__reset(_PagedArenaPage* self) {
+void _pg_arena_page__reset(_pg_arena_page_t* self) {
   self->pos = 0;
 }
 
-/**
- * @struct PagedArena
- * @brief A structure representing a paged memory arena.
- *
- * This structure represents a paged memory arena with a head and tail pointer
- * to _PagedArenaPage, and the size of each page.
- *
- * @var PagedArena::head
- * The head pointer to the first _PagedArenaPage in the paged memory arena.
- *
- * @var PagedArena::tail
- * The tail pointer to the last _PagedArenaPage in the paged memory arena.
- *
- * @var PagedArena::page_size
- * The size of each page in the paged memory arena. It is of type size_t.
- */
-struct PagedArena {
-  _PagedArenaPage *head, *tail;
+typedef struct pg_arena_t pg_arena_t;
+
+struct pg_arena_t {
+  _pg_arena_page_t *head, *tail;
   size_t page_size;
 };
 
-/**
- * @brief Creates a new PagedArena object.
- *
- * This function creates a new PagedArena object and allocates memory for it.
- * The size of each page in the PagedArena is set to the size specified by the
- * parameter. The head and tail of the PagedArena are set to a new
- * _PagedArenaPage object.
- *
- * @param page_size The size of each page in the PagedArena.
- *
- * @return A pointer to the newly created PagedArena object.
- */
 __CCMS__INLINE
-PagedArena* paged_arena__new(const size_t page_size) {
-  PagedArena* self = _M_new(PagedArena);
+pg_arena_t* pg_arena__new(const size_t page_size) {
+  pg_arena_t* self = _M_new(pg_arena_t);
 
   self->page_size = page_size;
-  self->head = self->tail = _paged_arena_page__new(page_size, NULL);
+  self->head = self->tail = _pg_arena_page__new(page_size, NULL);
 
   return self;
 }
 
-/**
- * @brief Frees a PagedArena object.
- *
- * This function frees a PagedArena object and all its associated
- * _PagedArenaPage objects.
- *
- * @param self A pointer to the PagedArena object to be freed.
- */
 __CCMS__INLINE
-void paged_arena__free(PagedArena* self) {
-  for (_PagedArenaPage *itr = self->head, *tmp; itr != NULL; itr = tmp) {
+void pg_arena__free(pg_arena_t* self) {
+  for (_pg_arena_page_t *itr = self->head, *tmp; itr != NULL; itr = tmp) {
     tmp = itr->next;
-    _paged_arena_page__free(itr);
+    _pg_arena_page__free(itr);
   }
   _M_free(self);
 }
 
-/**
- * @brief Resets a PagedArena object.
- *
- * This function resets a PagedArena object by resetting each of its
- * _PagedArenaPage objects. This effectively makes the entire PagedArena
- * unoccupied.
- *
- * @param self A pointer to the PagedArena object to be reset.
- */
 __CCMS__INLINE
-void paged_arena__reset(PagedArena* self) {
-  for (_PagedArenaPage* itr = self->head; itr != NULL; itr = itr->next)
-    _paged_arena_page__reset(itr);
+void pg_arena__reset(pg_arena_t* self) {
+  for (_pg_arena_page_t* itr = self->head; itr != NULL; itr = itr->next)
+    _pg_arena_page__reset(itr);
 
   self->tail = self->head;
 }
 
-/**
- * @brief Performs a hard reset on a PagedArena object.
- *
- * This function performs a hard reset on a PagedArena object by freeing all
- * _PagedArenaPage objects except the head, resetting the head, and setting the
- * tail of the PagedArena to its head. This effectively makes the entire
- * PagedArena unoccupied and frees up memory used by all pages except the first
- * one.
- *
- * @param self A pointer to the PagedArena object to be hard reset.
- */
 __CCMS__INLINE
-void paged_arena__hard_reset(PagedArena* self) {
+void pg_arena__hard_reset(pg_arena_t* self) {
   if (self->head->next != NULL)
-    for (_PagedArenaPage *itr = self->head->next, *tmp; itr != NULL;
+    for (_pg_arena_page_t *itr = self->head->next, *tmp; itr != NULL;
          itr = tmp) {
       tmp = itr->next;
-      _paged_arena_page__free(itr);
+      _pg_arena_page__free(itr);
     }
 
-  _paged_arena_page__reset(self->head);
+  _pg_arena_page__reset(self->head);
   self->head->next = NULL;
   self->tail = self->head;
 }
 
-/**
- * @brief Allocates a chunk of memory from a PagedArena object.
- *
- * This function allocates a chunk of memory of a specified size from a
- * PagedArena object. If the size requested is larger than the page size of the
- * PagedArena, a warning is printed and NULL is returned. If there is not enough
- * space in the current page (_PagedArenaPage), a new page is allocated and
- * added to the PagedArena. The position in the current page is updated to
- * reflect the allocation.
- *
- * @param self A pointer to the PagedArena object from which to allocate memory.
- * @param size The size of the memory chunk to be allocated.
- *
- * @return A pointer to the allocated memory chunk, or NULL if the size
- * requested is larger than the page size of the PagedArena.
- */
 __CCMS__INLINE
-uint8_t* paged_arena__alloc(PagedArena* self, const size_t size) {
-  // If the requested size is larger than the page size of the PagedArena
+uint8_t* pg_arena__alloc(pg_arena_t* self, const size_t size) {
+  // If the requested size is larger than the page size of the pg_arena_t
   if (size > self->page_size) {
 #ifndef __CCMS__SUPPRESS_WARNINGS
     // Print a warning message
@@ -258,17 +130,17 @@ uint8_t* paged_arena__alloc(PagedArena* self, const size_t size) {
   if (self->page_size - self->tail->pos < size) {
     if (self->tail->next == NULL)
       // Allocate a new page and set it as the next page
-      self->tail->next = _paged_arena_page__new(self->page_size, NULL);
+      self->tail->next = _pg_arena_page__new(self->page_size, NULL);
 
     // Move tail to the next page
     self->tail = self->tail->next;
   }
 
   // Calculate the address of the new chunk by adding the size of the
-  // _PagedArenaPage struct and the current position to the address of the
+  // _pg_arena_page_t struct and the current position to the address of the
   // current page
-  uint8_t* result =
-      _M_cast(uint8_t*, self->tail) + sizeof(_PagedArenaPage) + self->tail->pos;
+  uint8_t* result = _M_cast(uint8_t*, self->tail) + sizeof(_pg_arena_page_t) +
+                    self->tail->pos;
   // Update the position in the current page
   self->tail->pos += size;
 
@@ -276,24 +148,12 @@ uint8_t* paged_arena__alloc(PagedArena* self, const size_t size) {
   return result;
 }
 
-/**
- * @brief Calculates the average utilization of a PagedArena object.
- *
- * This function calculates the average utilization of a PagedArena object by
- * summing the utilization of each _PagedArenaPage (current position divided by
- * page size) and dividing by the total number of pages.
- *
- * @param self A pointer to the PagedArena object for which to calculate the
- * average utilization.
- *
- * @return The average utilization of the PagedArena object.
- */
 __CCMS__INLINE
-float paged_arena__avg_util(const PagedArena* self) {
+float pg_arena__avg_util(const pg_arena_t* self) {
   float sum = 0.f;
   size_t len = 0;
 
-  for (_PagedArenaPage* itr = self->head; itr != NULL; itr = itr->next, len++)
+  for (_pg_arena_page_t* itr = self->head; itr != NULL; itr = itr->next, len++)
     sum += _M_cast(float, itr->pos) / self->page_size;
 
   return sum / len;

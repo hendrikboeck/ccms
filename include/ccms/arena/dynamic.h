@@ -17,8 +17,8 @@
 /* with this program.  If not, see <https://www.gnu.org/licenses/>.           */
 /******************************************************************************/
 
-#ifndef __CCMS_ARENAS_DYNAMIC_H
-#define __CCMS_ARENAS_DYNAMIC_H
+#ifndef __CCMS__ARENAS__DYNAMIC__H
+#define __CCMS__ARENAS__DYNAMIC__H
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,56 +31,18 @@ extern "C" {
 #include "ccms/_defs.h"
 #include "ccms/_macros.h"
 
-/**
- * @typedef _DynamicArenaBlock
- * @brief Typedef for struct _DynamicArenaBlock
- *
- * This typedef provides a shorthand for the struct _DynamicArenaBlock.
- */
-typedef struct _DynamicArenaBlock _DynamicArenaBlock;
+typedef struct _dyn_arena_block_t _dyn_arena_block_t;
 
-/**
- * @typedef DynamicArena
- * @brief Typedef for struct DynamicArena
- *
- * This typedef provides a shorthand for the struct DynamicArena.
- */
-typedef struct DynamicArena DynamicArena;
-
-/**
- * @struct _DynamicArenaBlock
- * @brief A block of memory in a dynamic arena.
- *
- * This struct represents a block of memory in a dynamic arena. Each block has a
- * pointer to the next block and a size.
- *
- * @var _DynamicArenaBlock::next
- * Pointer to the next block in the dynamic arena.
- *
- * @var _DynamicArenaBlock::size
- * The size of the block in bytes.
- */
-struct _DynamicArenaBlock {
-  _DynamicArenaBlock* next;
+struct _dyn_arena_block_t {
+  _dyn_arena_block_t* next;
   size_t size;
 };
 
-/**
- * @brief Constructs a new _DynamicArenaBlock object.
- *
- * This function constructs a new _DynamicArenaBlock object with the given size
- * and next block.
- *
- * @param size The size of the block in bytes.
- * @param next Pointer to the next block in the dynamic arena.
- *
- * @return A new _DynamicArenaBlock object.
- */
 __CCMS__INLINE
-_DynamicArenaBlock* _dynamic_arena_block__new(const size_t size,
-                                              _DynamicArenaBlock* next) {
-  _DynamicArenaBlock* self =
-      _M_cast(_DynamicArenaBlock*, _M_alloc(sizeof(_DynamicArenaBlock) + size));
+_dyn_arena_block_t* _dyn_arena_block__new(const size_t size,
+                                          _dyn_arena_block_t* next) {
+  _dyn_arena_block_t* self =
+      _M_cast(_dyn_arena_block_t*, _M_alloc(sizeof(_dyn_arena_block_t) + size));
 
   self->next = next;
   self->size = size;
@@ -88,115 +50,54 @@ _DynamicArenaBlock* _dynamic_arena_block__new(const size_t size,
   return self;
 }
 
-/**
- * @brief Frees a _DynamicArenaBlock object.
- *
- * This function frees a _DynamicArenaBlock object.
- *
- * @param self The _DynamicArenaBlock object to free.
- */
 __CCMS__INLINE
-void _dynamic_arena_block__free(_DynamicArenaBlock* self) {
+void _dyn_arena_block__free(_dyn_arena_block_t* self) {
   _M_free(self);
 }
 
-/**
- * @brief Clones a _DynamicArenaBlock object.
- *
- * This function clones a _DynamicArenaBlock object, creating a new
- * _DynamicArenaBlock with the same size and next block as the original.
- *
- * @param self The _DynamicArenaBlock object to clone.
- *
- * @return A new _DynamicArenaBlock object with the same size and next block as
- * the original.
- */
 __CCMS__INLINE
-_DynamicArenaBlock* _dynamic_arena_block__clone(
-    const _DynamicArenaBlock* self) {
-  _DynamicArenaBlock* other = _M_cast(
-      _DynamicArenaBlock*, _M_alloc(sizeof(_DynamicArenaBlock) + self->size));
-  memcpy(other, self, sizeof(_DynamicArenaBlock) + self->size);
+_dyn_arena_block_t* _dyn_arena_block__clone(const _dyn_arena_block_t* self) {
+  _dyn_arena_block_t* other = _M_cast(
+      _dyn_arena_block_t*, _M_alloc(sizeof(_dyn_arena_block_t) + self->size));
+  memcpy(other, self, sizeof(_dyn_arena_block_t) + self->size);
 
   return other;
 }
 
-/**
- * @struct DynamicArena
- * @brief A dynamic memory arena.
- *
- * This struct represents a dynamic memory arena. It contains pointers to the
- * head and tail blocks of the arena.
- *
- * @var DynamicArena::head
- * Pointer to the first block in the dynamic arena.
- *
- * @var DynamicArena::tail
- * Pointer to the last block in the dynamic arena.
- */
-struct DynamicArena {
-  _DynamicArenaBlock *head, *tail;
+typedef struct dyn_arena_t dyn_arena_t;
+
+struct dyn_arena_t {
+  _dyn_arena_block_t *head, *tail;
 };
 
-/**
- * @brief Constructs a new DynamicArena object.
- *
- * This function constructs a new DynamicArena object.
- *
- * @return A new DynamicArena object.
- */
 __CCMS__INLINE
-DynamicArena* dynamic_arena__new() {
-  DynamicArena* self = _M_new(DynamicArena);
+dyn_arena_t* dyn_arena__new() {
+  dyn_arena_t* self = _M_new(dyn_arena_t);
 
   self->head = self->tail = NULL;
 
   return self;
 }
 
-/**
- * @brief Resets a DynamicArena object.
- *
- * This function resets a DynamicArena object, freeing all of its blocks.
- *
- * @param self The DynamicArena object to reset.
- */
 __CCMS__INLINE
-void dynamic_arena__reset(DynamicArena* self) {
-  for (_DynamicArenaBlock *itr = self->head, *tmp; itr != NULL; itr = tmp) {
+void dyn_arena__reset(dyn_arena_t* self) {
+  for (_dyn_arena_block_t *itr = self->head, *tmp; itr != NULL; itr = tmp) {
     tmp = itr->next;
-    _dynamic_arena_block__free(itr);
+    _dyn_arena_block__free(itr);
   }
 
   self->head = self->tail = NULL;
 }
 
-/**
- * @brief Frees a DynamicArena object.
- *
- * This function frees a DynamicArena object, freeing all of its blocks.
- *
- * @param self The DynamicArena object to free.
- */
 __CCMS__INLINE
-void dynamic_arena__free(DynamicArena* self) {
-  dynamic_arena__reset(self);
+void dyn_arena__free(dyn_arena_t* self) {
+  dyn_arena__reset(self);
   _M_free(self);
 }
 
-/**
- * @brief Allocates memory in a DynamicArena object.
- *
- * This function allocates memory in a DynamicArena object.
- *
- * @param self The DynamicArena object to allocate memory in.
- * @param size The size of the memory to allocate in bytes.
- *
- * @return A pointer to the allocated memory.
- */
 __CCMS__INLINE
-uint8_t* dynamic_arena__alloc(DynamicArena* self, const size_t size) {
-  _DynamicArenaBlock* new_block = _dynamic_arena_block__new(size, NULL);
+uint8_t* dyn_arena__alloc(dyn_arena_t* self, const size_t size) {
+  _dyn_arena_block_t* new_block = _dyn_arena_block__new(size, NULL);
 
   if (self->tail != NULL)
     self->tail->next = new_block;
@@ -204,11 +105,11 @@ uint8_t* dynamic_arena__alloc(DynamicArena* self, const size_t size) {
     self->head = new_block;
   self->tail = new_block;
 
-  return _M_cast(uint8_t*, new_block) + sizeof(_DynamicArenaBlock);
+  return _M_cast(uint8_t*, new_block) + sizeof(_dyn_arena_block_t);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // __CCMS_ARENAS_DYNAMIC_H
+#endif  // __CCMS__ARENAS__DYNAMIC__H

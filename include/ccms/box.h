@@ -30,59 +30,59 @@ extern "C" {
 #include "ccms/_defs.h"
 
 /**
- * @typedef Box
- * @brief Typedef for struct Box
+ * @typedef box_t
+ * @brief Typedef for struct box_t
  *
- * This typedef provides a shorthand for the struct Box.
+ * This typedef provides a shorthand for the struct box_t.
  */
-typedef struct Box Box;
+typedef struct box_t box_t;
 
 /**
- * @struct Box
+ * @struct box_t
  * @brief A structure representing a box.
  *
  * This structure represents a box with a pointer to its data and the size of
  * the data in bytes.
  *
- * @var Box::ptr
+ * @var box_t::ptr
  * The pointer to the data of the box. It is a pointer to a uint8_t.
  *
- * @var Box::size
+ * @var box_t::size
  * The size of the data of the box in bytes. It is of type size_t.
  */
-struct Box {
+struct box_t {
   uint8_t* ptr;
   size_t size;
 };
 
 /**
- * @brief Constructs a Box object.
+ * @brief Constructs a box_t object.
  *
- * This function constructs a Box object with the given pointer and size.
+ * This function constructs a box_t object with the given pointer and size.
  *
  * @param ptr The pointer to the data of the box.
  * @param size The size of the data of the box.
  *
- * @return A Box object.
+ * @return A box_t object.
  */
 __CCMS__INLINE
-Box box__ctor(uint8_t* ptr, size_t size) {
-  return (Box){ptr, size};
+box_t box__ctor(uint8_t* ptr, size_t size) {
+  return (box_t){.ptr = ptr, .size = size};
 }
 
 /**
- * @brief Clones a Box object.
+ * @brief Clones a box_t object.
  *
- * This function clones a Box object, creating a new Box with the same pointer
- * and size as the original.
+ * This function clones a box_t object, creating a new box_t with the same
+ * pointer and size as the original.
  *
- * @param other The Box object to clone.
+ * @param other The box_t object to clone.
  *
- * @return A new Box object with the same pointer and size as the original.
+ * @return A new box_t object with the same pointer and size as the original.
  */
 __CCMS__INLINE
-Box box__clone(const Box* other) {
-  return (Box){other->ptr, other->size};
+box_t box__clone(const box_t* other) {
+  return (box_t){.ptr = other->ptr, .size = other->size};
 }
 
 #ifdef __cplusplus

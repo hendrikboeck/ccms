@@ -27,60 +27,60 @@
 
 //
 //
-// ------------------ SizedMemory ------------------
+// ------------------ sized_mem_t ------------------
 //
 //
 
-void test__sized_memory__new() {
+void test__sized_mem__new() {
   // -- TEST
-  SizedMemory* sm = sized_memory__new(10);
+  sized_mem_t* sm = sized_mem__new(10);
   assert(sm != NULL);
   assert(sm->size == 10);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  sized_mem__free(sm);
 }
 
-void test__sized_memory__clone() {
+void test__sized_mem__clone() {
   // -- PREPARE
-  SizedMemory* sm1 = sized_memory__new(10);
+  sized_mem_t* sm1 = sized_mem__new(10);
 
   // -- TEST
-  SizedMemory* sm2 = sized_memory__clone(sm1);
+  sized_mem_t* sm2 = sized_mem__clone(sm1);
   assert(sm2 != NULL);
   assert(sm2->size == sm1->size);
   assert(memcmp(sm1->ptr, sm2->ptr, sm1->size) == 0);
 
   // -- CLEANUP
-  sized_memory__free(sm1);
-  sized_memory__free(sm2);
+  sized_mem__free(sm1);
+  sized_mem__free(sm2);
 }
 
-void test__sized_memory__as_box() {
+void test__sized_mem__as_box() {
   // -- PREPARE
-  SizedMemory* sm = sized_memory__new(10);
+  sized_mem_t* sm = sized_mem__new(10);
 
   // -- TEST
-  Box b = sized_memory__as_box(sm);
+  box_t b = sized_mem__as_box(sm);
   assert(b.ptr == sm->ptr);
   assert(b.size == sm->size);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  sized_mem__free(sm);
 }
 
-void test__sized_memory__from_box() {
+void test__sized_mem__from_box() {
   // -- PREPARE
-  Box b = box__ctor((uint8_t*)"hello", 5);
+  box_t b = box__ctor((uint8_t*)"hello", 5);
 
   // -- TEST
-  SizedMemory* sm = sized_memory__from_box(b);
+  sized_mem_t* sm = sized_mem__from_box(b);
   assert(sm != NULL);
   assert(sm->size == b.size);
   assert(memcmp(sm->ptr, b.ptr, b.size) == 0);
 
   // -- CLEANUP
-  sized_memory__free(sm);
+  sized_mem__free(sm);
 }
 
 //
@@ -90,11 +90,11 @@ void test__sized_memory__from_box() {
 //
 
 int main() {
-  // -- SizedMemory
-  test__sized_memory__new();
-  test__sized_memory__clone();
-  test__sized_memory__as_box();
-  test__sized_memory__from_box();
+  // -- sized_mem_t
+  test__sized_mem__new();
+  test__sized_mem__clone();
+  test__sized_mem__as_box();
+  test__sized_mem__from_box();
 
   return 0;
 }

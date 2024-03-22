@@ -27,108 +27,108 @@
 
 //
 //
-// ------------------ _PagedArenaPage ------------------
+// ------------------ _pg_arena_page_t ------------------
 //
 //
 
-void test___paged_arena_page__new() {
+void test___pg_arena_page__new() {
   // -- TEST
-  _PagedArenaPage* page = _paged_arena_page__new(10, NULL);
+  _pg_arena_page_t* page = _pg_arena_page__new(10, NULL);
   assert(page != NULL);
   assert(page->pos == 0);
   assert(page->next == NULL);
 
   // -- CLEANUP
-  _paged_arena_page__free(page);
+  _pg_arena_page__free(page);
 }
 
-void test___paged_arena_page__reset() {
+void test___pg_arena_page__reset() {
   // -- PREPARE
-  _PagedArenaPage* page = _paged_arena_page__new(10, NULL);
+  _pg_arena_page_t* page = _pg_arena_page__new(10, NULL);
   page->pos = 5;
 
   // -- TEST
-  _paged_arena_page__reset(page);
+  _pg_arena_page__reset(page);
   assert(page->pos == 0);
 
   // -- CLEANUP
-  _paged_arena_page__free(page);
+  _pg_arena_page__free(page);
 }
 
 //
 //
-// ------------------ PagedArena ------------------
+// ------------------ pg_arena_t ------------------
 //
 //
 
-void test__paged_arena__new() {
+void test__pg_arena__new() {
   // -- TEST
-  PagedArena* arena = paged_arena__new(10);
+  pg_arena_t* arena = pg_arena__new(10);
   assert(arena != NULL);
   assert(arena->page_size == 10);
   assert(arena->head != NULL);
   assert(arena->tail != NULL);
 
   // -- CLEANUP
-  paged_arena__free(arena);
+  pg_arena__free(arena);
 }
 
-void test__paged_arena__reset() {
+void test__pg_arena__reset() {
   // -- PREPARE
-  PagedArena* arena = paged_arena__new(10);
-  uint8_t* chunk = paged_arena__alloc(arena, 5);
+  pg_arena_t* arena = pg_arena__new(10);
+  uint8_t* chunk = pg_arena__alloc(arena, 5);
 
   // -- TEST
-  paged_arena__reset(arena);
+  pg_arena__reset(arena);
   assert(arena->tail == arena->head);
 
-  for (_PagedArenaPage* itr = arena->head; itr != NULL; itr = itr->next)
+  for (_pg_arena_page_t* itr = arena->head; itr != NULL; itr = itr->next)
     assert(itr->pos == 0);
 
   // -- CLEANUP
-  paged_arena__free(arena);
+  pg_arena__free(arena);
 }
 
-void test__paged_arena__hard_reset() {
+void test__pg_arena__hard_reset() {
   // -- PREPARE
-  PagedArena* arena = paged_arena__new(10);
-  uint8_t* chunk = paged_arena__alloc(arena, 5);
+  pg_arena_t* arena = pg_arena__new(10);
+  uint8_t* chunk = pg_arena__alloc(arena, 5);
 
   // -- TEST
-  paged_arena__hard_reset(arena);
+  pg_arena__hard_reset(arena);
   assert(arena->tail == arena->head);
   assert(arena->head->next == NULL);
 
-  for (_PagedArenaPage* itr = arena->head; itr != NULL; itr = itr->next)
+  for (_pg_arena_page_t* itr = arena->head; itr != NULL; itr = itr->next)
     assert(itr->pos == 0);
 
   // -- CLEANUP
-  paged_arena__free(arena);
+  pg_arena__free(arena);
 }
 
-void test__paged_arena__alloc() {
+void test__pg_arena__alloc() {
   // -- PREPARE
-  PagedArena* arena = paged_arena__new(10);
+  pg_arena_t* arena = pg_arena__new(10);
 
   // -- TEST
-  uint8_t* chunk = paged_arena__alloc(arena, 5);
+  uint8_t* chunk = pg_arena__alloc(arena, 5);
   assert(chunk != NULL);
 
   // -- CLEANUP
-  paged_arena__free(arena);
+  pg_arena__free(arena);
 }
 
-void test__paged_arena__avg_util() {
+void test__pg_arena__avg_util() {
   // -- PREPARE
-  PagedArena* arena = paged_arena__new(10);
-  uint8_t* chunk = paged_arena__alloc(arena, 5);
+  pg_arena_t* arena = pg_arena__new(10);
+  uint8_t* chunk = pg_arena__alloc(arena, 5);
 
   // -- TEST
-  float avg_util = paged_arena__avg_util(arena);
+  float avg_util = pg_arena__avg_util(arena);
   assert(avg_util == 0.5);
 
   // -- CLEANUP
-  paged_arena__free(arena);
+  pg_arena__free(arena);
 }
 
 //
@@ -138,16 +138,16 @@ void test__paged_arena__avg_util() {
 //
 
 int main() {
-  // -- _PagedArenaPage
-  test___paged_arena_page__new();
-  test___paged_arena_page__reset();
+  // -- _pg_arena_page_t
+  test___pg_arena_page__new();
+  test___pg_arena_page__reset();
 
-  // -- PagedArena
-  test__paged_arena__new();
-  test__paged_arena__reset();
-  test__paged_arena__hard_reset();
-  test__paged_arena__alloc();
-  test__paged_arena__avg_util();
+  // -- pg_arena_t
+  test__pg_arena__new();
+  test__pg_arena__reset();
+  test__pg_arena__hard_reset();
+  test__pg_arena__alloc();
+  test__pg_arena__avg_util();
 
   return 0;
 }
